@@ -7,6 +7,7 @@ const App: React.FC<IProps> = (props) => {
     return (
         <>
             <CssBaseline />
+            {/* Add project code beneath the baseline */}
         </>
       );
 }
