@@ -2,7 +2,11 @@ import Box from '@mui/material/Box';
 import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import rows from '../utils/rows';
 
-const Table = () => {
+interface IProps {
+    isCollapsed: boolean;
+}
+
+const Table: React.FC<IProps> = (props) => {
     const columns = [
         { field: 'awardedCompany', headerName: 'Awarded Company', width: 250 },
         { field: 'date', headerName: 'Date', width: 150 },
@@ -42,7 +46,7 @@ const Table = () => {
                 columns={columns}
                 slots={{ toolbar: GridToolbar }}
                 autoPageSize={true}
-                sx={{ height: '55vh', '.MuiDataGrid-scrollbar': { left: 0 } }}
+                sx={{ height: (props.isCollapsed ? '30vh' : '70vh'), '.MuiDataGrid-scrollbar': { left: 0 } }}
             />
         </Box>
     );
