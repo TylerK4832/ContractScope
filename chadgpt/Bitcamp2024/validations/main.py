@@ -1,8 +1,8 @@
 import pandas as pd
 
 # Specify the file path
-manual_path = "./manual.tsv"
-gpt_path = "./gpt_results.tsv"
+manual_path = "./manual_output.tsv"
+gpt_path = "./gpt_output.tsv"
 model_path = "./model_results.tsv"
 # Read the TSV file into a pandas DataFrame
 manual_df = pd.read_csv(manual_path, sep='\t')
