@@ -8,5 +8,6 @@ export const numToUsd = (num: number): string => {
 }
 
 export const usdToNum = (usd: string): number => {
-    return Number(usd.replace(/[^0-9.-]+/g,""));
+    const numericString = usd.replace(/[^0-9.-]/g, "");
+    return parseFloat(numericString);
 }
