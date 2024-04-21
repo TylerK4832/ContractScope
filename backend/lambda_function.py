@@ -9,6 +9,60 @@ import re
 # Utilize AWS Lambda and EventBridge in order to schedule our lambda to run M-F @ 8 PM EST (1 AM UTC)
 
 dynamodb_client = boto3.client('dynamodb', region_name='us-east-1') 
+api_url = "https://xgoth4mou0.execute-api.us-east-2.amazonaws.com/test/infercontract"
+
+def get_trained_output(context):
+    input_data = {
+        "inputs": [
+            {
+                "question": "What is the company that was awarded the contract?",
+                "context": context
+            },
+            {
+                "question": "Where will the work be performed?",
+                "context": context
+            },
+            {
+                "question": "What is the amount awarded?",
+                "context": context
+            },
+            {
+                "question": "What is the contract awarded for?",
+                "context": context
+            },
+            {
+                "question": "When is the contract expected to be completed by?",
+                "context": context
+            },
+            {
+                "question": "What is the contracting activity?",
+                "context": context
+            },
+            {
+                "question": "What is the type of contract?",
+                "context": context
+            },
+            {
+                "question": "What is the contract number?",
+                "context": context
+            },
+            {
+                "question": "Is this a modification to a previous contract?",
+                "context": context
+            },
+        ]
+    }
+
+    payload = json.dumps(input_data)
+    headers = {
+        "Content-Type": "application/json"
+    }
+    response = requests.post(api_url, data=payload, headers=headers)
+    response = response.json()
+    extracted_answers = [entry["answer"] for entry in response]
+    field_names = ["companyName", "workLocation", "amountAwarded", "awardedFor", "completionDate", "contractingActivity", "contractType", "contractNumber"]
+    data_to_insert = {field_names[i]: extracted_answers[i] for i in range(len(field_names))}
+    return data_to_insert
 
 def check_date_in_contracts(date):
     response = dynamodb_client.query(
@@ -48,7 +102,6 @@ def parse_date(title):
         raise Exception("Can't parse date; aborting")
         
 def get_most_recent_contract():
-    # Most recent data will be updated on the /News/Contracts/ 
     link = 'https://www.defense.gov/News/Contracts/'
     page_content = requests.get(link).text
     url_pattern = r'https://www\.defense\.gov/News/Contracts/Contract/Article/\d+/'
@@ -107,10 +160,25 @@ def lambda_handler(event, context):
             'texts': set(contracts)
         }
         )
+        table = dynamodb_resource.Table('FinalContracts')
+        curr = []
+        for contract in contracts:
+            output = get_trained_output(contract)
+            if output['companyName'] != '' and output['amountAwarded'] != '':
+                curr.append(output)
+        formatted = [{'M': {key: {'S': value} for key, value in contract.items()}} for contract in curr]
+        data_to_insert = {
+            'id': {'S': date},
+            'contracts': {'L': formatted}
+        }
+        response = table.put_item(
+            TableName='FinalContracts',
+            Item=data_to_insert
+        )
         if response['ResponseMetadata']['HTTPStatusCode'] == 200:
             return {
                 'statusCode': 200,
-                'body': json.dumps('Successfully parsed and gathered new contract')
+                'body': json.dumps('Successfully parsed and read through new contract')
             }
         else:
             return {
