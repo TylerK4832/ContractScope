@@ -1,15 +1,12 @@
-import CssBaseline from '@mui/material/CssBaseline';
-import './App.css';
+import React from 'react';
+import MapComponent from './MapComponent';
 
-interface IProps {}
-
-const App: React.FC<IProps> = (props) => {
+const App: React.FC = () => {
     return (
-        <>
-            <CssBaseline />
-            {/* Add project code beneath the baseline */}
-        </>
-      );
+        <div>
+            <MapComponent />
+        </div>
+    );
 }
 
 export default App;
