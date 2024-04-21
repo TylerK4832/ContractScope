@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Contract } from '../../types';
 import { usdToNum } from '../utils/currencyConverter';
-import { abbrevToState, stateAbbrevs, stateCenters, states } from '../utils/state';
+import { abbrevToState, hslToHex, stateAbbrevs, stateCenters, states } from '../utils/state';
 
 // type Contract = {
 //     company: string;
@@ -300,9 +300,9 @@ const MapComponent: React.FC<IProps> = (props) => {
 
             Object.entries(stats).forEach(([location, locationStats]) => {
                 fetchCoordinates(location).then((coordinates) => {
-                    const intensity = Math.floor((1 - locationStats.count / maxCount) * 255);
-                    const color = `rgb(${intensity}, ${intensity}, ${intensity})`; // Darker with more contracts
-
+                    const intensity = Math.floor((1 - locationStats.count / maxCount) * 85);
+                    const color = hslToHex(155, 100, intensity);
+                    
                     const marker = new mapboxgl.Marker({ color: color })
                         .setLngLat(coordinates)
                         .addTo(map);
