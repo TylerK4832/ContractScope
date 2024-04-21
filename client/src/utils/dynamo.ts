@@ -55,7 +55,7 @@ const cleaner = (rawRows: RawContract[]): Contract[] => {
   return rawRows.map((r) => ({
     id: Math.random().toFixed(10).toString(),
     workLocation: r.M.workLocation.S,
-    amountAwarded: r.M.amountAwarded.S,
+    amountAwarded: formatAmountAwarded(r.M.amountAwarded.S),
     contractingActivity: r.M.contractingActivity.S,
     awardedFor: r.M.awardedFor.S,
     contractType: r.M.contractType.S,
@@ -63,6 +63,12 @@ const cleaner = (rawRows: RawContract[]): Contract[] => {
     contractNumber: r.M.contractNumber.S,
     completionDate: formatDate(r.M.completionDate.S),
   }));
+}
+
+const formatAmountAwarded = (amount: string): string => {
+    if (amount.includes("and"))
+        return amount.split("and")[0];
+    return amount;
 }
 
 const formatDate = (datestr: string): string => {
