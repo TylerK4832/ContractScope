@@ -1,38 +1,52 @@
-// import * as React from "react";
 import { LineChart } from '@mui/x-charts';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
-import rows from '../utils/rows';
+import { Contract } from '../../types';
+import { usdToNum } from '../utils/currencyConverter';
 
-const TimeSeries = () => {
+interface IProps {
+    data: Contract[];
+}
+
+const TimeSeries: React.FC<IProps> = (props) => {
     const dateToAmountAwarded: { [date: string]: number } = {};
+    for (let contract of props.data) {
+        let contract_date;
+        try {
+            contract_date = new Date(contract.completionDate).getUTCFullYear();
 
-    rows.forEach((contract) => {
-        let contract_date = contract.date.toISOString();
+            if (isNaN(contract_date)) continue;
+        }
+        catch {
+            continue;
+        }
+
         // If the date already exists in the hash map, increment its value by the amount awarded
         if (dateToAmountAwarded[contract_date]) {
-            dateToAmountAwarded[contract_date] += contract.amountAwarded;
+            dateToAmountAwarded[contract_date] += usdToNum(contract.amountAwarded);
         } else {
             // If the date does not exist in the hash map, initialize it with the amount awarded
-            dateToAmountAwarded[contract_date] = contract.amountAwarded;
+            dateToAmountAwarded[contract_date] = usdToNum(contract.amountAwarded);
         }
-    });
+    }
 
-    const keys = Object.keys(dateToAmountAwarded).sort();
-    const keys_dated = keys.map((k) => new Date(k));
-    const values = keys_dated.map((k) => dateToAmountAwarded[k.toISOString()] / 1000000);
+    const dateToAmountAwardedSorted = Object.fromEntries(
+        Object.entries(dateToAmountAwarded).sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+    );
+    const keys = Object.keys(dateToAmountAwardedSorted);
+    const values = Object.values(dateToAmountAwardedSorted).map((v) => v / 1e9);
 
     return (
         <LineChart
             xAxis={[
                 {
-                    data: keys_dated,
+                    data: keys,
                     scaleType: 'time',
                     label: 'Year',
                 },
             ]}
             yAxis={[
                 {
-                    label: 'Amount in Dollars (in Millions)',
+                    label: 'Amount in Dollars (in Billions)',
                 },
             ]}
             series={[

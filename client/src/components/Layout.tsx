@@ -1,14 +1,15 @@
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
-import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Grid from '@mui/material/Unstable_Grid2';
 import { styled } from '@mui/material/styles';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Contract } from '../../types';
+import { getDataFromDB } from "../utils/dynamo";
 import Leaderboard from './Leaderboard';
 import MapComponent from './MapComponent';
 import Table from './Table';
@@ -27,17 +28,29 @@ const Layout: React.FC = () => {
     const [rightPaneActive, setRightPaneActive] = useState('0');
     const [isCollapsed, setIsCollapsed] = useState(false);
 
+    const [data, setData] = useState<Contract[]>([]);
+
     const handleLeftPaneChange = (evt: React.SyntheticEvent<Element, Event>, idx: string) =>
         setLeftPaneActive(idx);
     const handleRightPaneChange = (evt: React.SyntheticEvent<Element, Event>, idx: string) =>
         setRightPaneActive(idx);
+
+    useEffect(() => {
+        async function getData() {
+            const results = await getDataFromDB();
+            setData(results);
+            console.log(results.slice(0, 5));
+        }
+
+        getData();
+    }, [])
 
     return (
         <Container sx={{ py: 1 }}>
             <Grid container spacing={2}>
                 <Grid xs={12} height={isCollapsed ? '35vh' : '75vh'} sx={{ position: 'relative' }}>
                     <Item>
-                        <Table isCollapsed={isCollapsed} />
+                        <Table isCollapsed={isCollapsed} data={data} />
                     </Item>
                     <Button
                         variant='outlined'
@@ -70,10 +83,10 @@ const Layout: React.FC = () => {
                                     p: 0
                                 }}
                             >
-                                <TimeSeries />
+                                <TimeSeries data={data}/>
                             </TabPanel>
                             <TabPanel value='1' sx={{ height: '50vh', p: 0, pt: 0.25 }}>
-                                <MapComponent />
+                                <MapComponent data={data}/>
                             </TabPanel>
                         </TabContext>
                     </Item>
@@ -85,7 +98,7 @@ const Layout: React.FC = () => {
                                 <Tab label='Funding Distribution' value='0' />
                             </TabList>
                             <TabPanel value='0' sx={{ p: 0 }}>
-                                <Leaderboard />
+                                <Leaderboard data={data}/>
                             </TabPanel>
                         </TabContext>
                     </Item>

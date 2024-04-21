@@ -4,9 +4,14 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
-import rows from '../utils/rows';
+import { Contract } from '../../types';
+import { usdToNum } from '../utils/currencyConverter';
 
-const Leaderboard: React.FC = () => {
+interface IProps {
+    data: Contract[];
+}
+
+const Leaderboard: React.FC<IProps> = (props) => {
     const [leaderboard, setLeaderboard] = useState<
         { awardedCompany: string; awardedAmount: number }[]
     >([]);
@@ -24,6 +29,8 @@ const Leaderboard: React.FC = () => {
                 'Raytheon',
                 'General Dynamics',
                 'Northrop Grumman',
+                'Boeing',
+                'Pfizer'
             ];
             const groups: { [key: string]: number } = {};
 
@@ -31,19 +38,19 @@ const Leaderboard: React.FC = () => {
                 groups[c] = 0;
             }
 
-            for (let row of rows) {
+            for (let row of props.data) {
                 let grouped = false;
                 for (let c of common_contractors) {
-                    if (row.awardedCompany.includes(c)) {
-                        groups[c] += row.amountAwarded;
+                    if (row.companyName.includes(c)) {
+                        groups[c] += usdToNum(row.amountAwarded);
                         grouped = true;
                     }
                 }
                 if (!grouped) {
-                    if (row.awardedCompany in groups) {
-                        groups[row.awardedCompany] += row.amountAwarded;
+                    if (row.companyName in groups) {
+                        groups[row.companyName] += usdToNum(row.amountAwarded);
                     } else {
-                        groups[row.awardedCompany] = row.amountAwarded;
+                        groups[row.companyName] = usdToNum(row.amountAwarded);
                     }
                 }
             }
@@ -59,7 +66,7 @@ const Leaderboard: React.FC = () => {
         };
 
         calcLeaderboard();
-    }, []);
+    }, [props.data]);
 
     return (
         <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', height: '50vh' }}>
