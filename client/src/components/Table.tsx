@@ -4,9 +4,13 @@ import rows from '../utils/rows';
 
 const Table = () => {
     const columns = [
-        { field: 'context', headerName: 'Context', width: 200 },
-        { field: 'date', headerName: 'Date', width: 150 },
         { field: 'awardedCompany', headerName: 'Awarded Company', width: 250 },
+        { field: 'date', headerName: 'Date', width: 150 },
+        {
+            field: 'expectedCompletionDate',
+            headerName: 'Est. Completion Date',
+            width: 250,
+        },
         {
             field: 'awardedCompanyLocation',
             headerName: 'Company Location',
@@ -14,12 +18,8 @@ const Table = () => {
         },
         { field: 'amountAwarded', headerName: 'Amount Awarded', width: 180 },
         { field: 'awardedFor', headerName: 'Awarded For', width: 250 },
+        { field: 'context', headerName: 'Context', width: 200 },
         { field: 'workLocation', headerName: 'Work Location', width: 250 },
-        {
-            field: 'expectedCompletionDate',
-            headerName: 'Expected Completion Date',
-            width: 250,
-        },
         {
             field: 'contractingActivityGroup',
             headerName: 'Contracting Activity Group',
@@ -42,7 +42,7 @@ const Table = () => {
                 columns={columns}
                 slots={{ toolbar: GridToolbar }}
                 autoPageSize={true}
-                sx={{ height: '55vh' }}
+                sx={{ height: '55vh', '.MuiDataGrid-scrollbar': { left: 0 } }}
             />
         </Box>
     );

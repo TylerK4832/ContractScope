@@ -49,7 +49,7 @@ const rows: Contract[] = [
     awardedFor:
       "construction of the Vertical Electro-Magnetic Pulse Simulator (VEMPS) at Patuxent River Naval Air Station",
     workLocation: "Patuxent River, Maryland",
-    expectedCompletionDate: new Date("June 2017"),
+    expectedCompletionDate: new Date("June 1, 2017"),
     contractingActivityGroup: "Naval Facilities Engineering Command",
     activityGroupLocation: "Washington, District of Columbia",
     activityCode: "N40080-16-C-3015",
@@ -67,7 +67,7 @@ const rows: Contract[] = [
     awardedFor:
       "repair and alteration requirements for USS Carl Vinson (CVN 70) fiscal 2019 dry-docking planned incremental availability (DPIA)",
     workLocation: "Bremerton, Washington",
-    expectedCompletionDate: new Date("July 2020"),
+    expectedCompletionDate: new Date("July 1, 2020"),
     contractingActivityGroup:
       "Puget Sound Naval Shipyard and Intermediate Maintenance Facility",
     activityGroupLocation: "Bremerton, Washington",
