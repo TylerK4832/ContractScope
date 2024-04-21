@@ -30,7 +30,7 @@ const TimeSeries: React.FC<IProps> = (props) => {
     }
 
     const dateToAmountAwardedSorted = Object.fromEntries(
-        Object.entries(dateToAmountAwarded).sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+        Object.entries(dateToAmountAwarded).sort((a, b) => parseInt(a[0]) - parseInt(b[0])).filter(([key, _]) => parseInt(key) >= 2000)
     );
     const keys = Object.keys(dateToAmountAwardedSorted)
     const values = Object.values(dateToAmountAwardedSorted).map((v) => v / 1e9);
@@ -40,7 +40,7 @@ const TimeSeries: React.FC<IProps> = (props) => {
             xAxis={[
                 {
                     data: keys,
-                    scaleType: 'time',
+                    scaleType: 'band',
                     label: 'Year Of Completion (2000s)',
                 },
             ]}
