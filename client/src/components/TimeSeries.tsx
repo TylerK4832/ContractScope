@@ -41,7 +41,7 @@ const TimeSeries: React.FC<IProps> = (props) => {
                 {
                     data: keys,
                     scaleType: 'time',
-                    label: 'Year (2000s)',
+                    label: 'Year Of Completion (2000s)',
                 },
             ]}
             yAxis={[
@@ -57,10 +57,10 @@ const TimeSeries: React.FC<IProps> = (props) => {
             sx={{
                 [`.${axisClasses.left} .${axisClasses.label}`]: {
                     // Move the y-axis label with CSS
-                    transform: 'translateX(-10px)',
+                    transform: 'translateX(-65px)',
                 },
             }}
-            margin={{ top: 5, right: 5, bottom: 80, left: 55 }}
+            margin={{ top: 5, right: 5, bottom: 80, left: 125 }}
         />
     );
 };
