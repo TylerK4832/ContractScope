@@ -19,6 +19,31 @@ const Table: React.FC<IProps> = (props) => {
         { field: 'contractNumber', headerName: 'Contract Number', width: 250 },
     ];
 
+    // function debounce() {
+    //     let timeoutId 
+    //     if (timeoutId !== null) {
+    //         clearTimeout(timeoutId);
+    //     }
+    //     timeoutId = setTimeout(onTableChange, 750); // Adjust the debounce time as needed
+    // }
+    
+
+    // const debounceTableChange = debounce(((state) => ) => {}, 250);
+
+    // const onTableChange = (state: any) => {
+    //     let activeCount = 0;
+    //     const activeKeys: string[] = [];
+
+    //     for (const [key, value] of Object.entries(state.visibleRowsLookup)) {
+    //         if (value === true) {
+    //             activeCount++;
+    //             activeKeys.push(key);
+    //         }
+    //     }
+
+    //     console.log(activeKeys);
+    // };
+
     return (
         <Box>
             <DataGrid
@@ -30,6 +55,7 @@ const Table: React.FC<IProps> = (props) => {
                     height: props.isCollapsed ? '30vh' : '70vh',
                     '.MuiDataGrid-scrollbar': { left: 0 },
                 }}
+                // onStateChange={(state) => onTableChange(state)}
             />
         </Box>
     );
