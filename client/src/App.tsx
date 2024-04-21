@@ -1,7 +1,6 @@
-import "./App.css";
-import BasicExampleDataGrid from "./components/table";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import "./App.css";
 import Layout from "./components/Layout";
 
 interface IProps {}
@@ -17,7 +16,6 @@ const App: React.FC<IProps> = (props) => {
     <>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <BasicExampleDataGrid />
         {/* Add project code beneath the baseline */}
         <Layout />
       </ThemeProvider>
