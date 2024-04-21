@@ -1,19 +1,21 @@
 // import * as React from "react";
 import { LineChart } from '@mui/x-charts';
 import { axisClasses } from '@mui/x-charts/ChartsAxis';
-import rows from '../utils/rows';
+import { usdToNum } from '../utils/currencyConverter';
+import { rows } from '../utils/data';
 
 const TimeSeries = () => {
     const dateToAmountAwarded: { [date: string]: number } = {};
 
     rows.forEach((contract) => {
-        let contract_date = contract.date.toISOString();
+        // let contract_date = contract.date.toISOString();
+        let contract_date = new Date(contract.completionDate).toISOString();
         // If the date already exists in the hash map, increment its value by the amount awarded
         if (dateToAmountAwarded[contract_date]) {
-            dateToAmountAwarded[contract_date] += contract.amountAwarded;
+            dateToAmountAwarded[contract_date] += usdToNum(contract.amountAwarded);
         } else {
             // If the date does not exist in the hash map, initialize it with the amount awarded
-            dateToAmountAwarded[contract_date] = contract.amountAwarded;
+            dateToAmountAwarded[contract_date] = usdToNum(contract.amountAwarded);
         }
     });
 

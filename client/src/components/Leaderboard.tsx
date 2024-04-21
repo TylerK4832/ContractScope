@@ -4,7 +4,8 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
-import rows from '../utils/rows';
+import { usdToNum } from '../utils/currencyConverter';
+import { rows } from '../utils/data';
 
 const Leaderboard: React.FC = () => {
     const [leaderboard, setLeaderboard] = useState<
@@ -34,16 +35,16 @@ const Leaderboard: React.FC = () => {
             for (let row of rows) {
                 let grouped = false;
                 for (let c of common_contractors) {
-                    if (row.awardedCompany.includes(c)) {
-                        groups[c] += row.amountAwarded;
+                    if (row.companyName.includes(c)) {
+                        groups[c] += usdToNum(row.amountAwarded);
                         grouped = true;
                     }
                 }
                 if (!grouped) {
-                    if (row.awardedCompany in groups) {
-                        groups[row.awardedCompany] += row.amountAwarded;
+                    if (row.companyName in groups) {
+                        groups[row.companyName] += usdToNum(row.amountAwarded);
                     } else {
-                        groups[row.awardedCompany] = row.amountAwarded;
+                        groups[row.companyName] = usdToNum(row.amountAwarded);
                     }
                 }
             }
