@@ -2,6 +2,7 @@
 import { DatasetElementType } from "@mui/x-charts/models/seriesType/config";
 import rows from "../utils/rows";
 import { LineChart } from "@mui/x-charts";
+import { axisClasses } from "@mui/x-charts/ChartsAxis";
 
 const VISIBLE_FIELDS = ["name", "rating", "country", "dateCreated", "isAdmin"];
 
@@ -91,7 +92,9 @@ const TimeSeries = () => {
 
   const keys = Object.keys(dateToAmountAwarded).sort();
   const keys_dated = keys.map((k) => new Date(k));
-  const values = keys_dated.map((k) => dateToAmountAwarded[k.toISOString()]);
+  const values = keys_dated.map(
+    (k) => dateToAmountAwarded[k.toISOString()] / 1000000
+  );
 
   console.log(keys.map((k) => new Date(k)));
   console.log(values);
@@ -101,6 +104,13 @@ const TimeSeries = () => {
         xAxis={[
           {
             data: keys_dated,
+            scaleType: "time",
+            label: "Year",
+          },
+        ]}
+        yAxis={[
+          {
+            label: "Amount in Dollars (in Millions)",
           },
         ]}
         series={[
@@ -108,8 +118,15 @@ const TimeSeries = () => {
             data: values,
           },
         ]}
-        width={500}
-        height={300}
+        width={600}
+        height={400}
+        sx={{
+          [`.${axisClasses.left} .${axisClasses.label}`]: {
+            // Move the y-axis label with CSS
+            transform: "translateX(-10px)",
+          },
+        }}
+        margin={{ top: 5, right: 5, bottom: 80, left: 55 }}
       />
     </div>
   );
