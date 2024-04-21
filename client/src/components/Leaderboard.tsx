@@ -4,10 +4,14 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
+import { Contract } from '../../types';
 import { usdToNum } from '../utils/currencyConverter';
-import { rows } from '../utils/data';
 
-const Leaderboard: React.FC = () => {
+interface IProps {
+    data: Contract[];
+}
+
+const Leaderboard: React.FC<IProps> = (props) => {
     const [leaderboard, setLeaderboard] = useState<
         { awardedCompany: string; awardedAmount: number }[]
     >([]);
@@ -25,6 +29,8 @@ const Leaderboard: React.FC = () => {
                 'Raytheon',
                 'General Dynamics',
                 'Northrop Grumman',
+                'Boeing',
+                'Pfizer'
             ];
             const groups: { [key: string]: number } = {};
 
@@ -32,7 +38,7 @@ const Leaderboard: React.FC = () => {
                 groups[c] = 0;
             }
 
-            for (let row of rows) {
+            for (let row of props.data) {
                 let grouped = false;
                 for (let c of common_contractors) {
                     if (row.companyName.includes(c)) {
@@ -60,7 +66,7 @@ const Leaderboard: React.FC = () => {
         };
 
         calcLeaderboard();
-    }, []);
+    }, [props.data]);
 
     return (
         <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', height: '50vh' }}>

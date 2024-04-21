@@ -2,19 +2,22 @@ import axios from 'axios';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import React, { useEffect, useMemo, useRef } from 'react';
+import { Contract } from '../../types';
+import { usdToNum } from '../utils/currencyConverter';
+import { abbrevToState, stateAbbrevs, stateCenters, states } from '../utils/state';
 
-type Contract = {
-    company: string;
-    location: string;
-    amount: number; // Assume the amount is parsed as number
-    purpose: string;
-    completionDate: Date;
-    contractActivity: string;
-    activityLocation: string;
-    contractCode: string;
-    contractType: string;
-    workLocation: string;
-};
+// type Contract = {
+//     company: string;
+//     location: string;
+//     amount: number; // Assume the amount is parsed as number
+//     purpose: string;
+//     completionDate: Date;
+//     contractActivity: string;
+//     activityLocation: string;
+//     contractCode: string;
+//     contractType: string;
+//     workLocation: string;
+// };
 
 const companies = [
     'BAE Systems Information and Electronic Systems',
@@ -115,93 +118,125 @@ const randomNumber = (min: number, max: number) =>
     Math.floor(Math.random() * (max - min + 1)) + min;
 
 // Function to generate random contracts
+// Function to generate random contracts
 const generateContracts = (numContracts: number): Contract[] => {
     const contracts: Contract[] = [];
     for (let i = 0; i < numContracts; i++) {
-        const company = companies[randomNumber(0, companies.length - 1)];
-        const location = locations[randomNumber(0, locations.length - 1)];
-        const amount = randomNumber(500000, 500000000);
-        const purpose = purposes[randomNumber(0, purposes.length - 1)];
-        const completionDate = randomDate(new Date(), new Date(2035, 12, 31));
-        const contractActivity = contractActivities[randomNumber(0, contractActivities.length - 1)];
-        const activityLocation = locations[randomNumber(0, locations.length - 1)];
-        const contractCode = `N${randomNumber(10000, 99999)}-${randomNumber(
+        const companyName = companies[randomNumber(0, companies.length - 1)];
+        const workLocation = locations[randomNumber(0, locations.length - 1)];
+        const amountAwarded = String(randomNumber(500000, 500000000));
+        const awardedFor = purposes[randomNumber(0, purposes.length - 1)];
+        const completionDate = randomDate(new Date(), new Date(2035, 11, 31))
+            .toISOString()
+            .split('T')[0];
+        const contractingActivity =
+            contractActivities[randomNumber(0, contractActivities.length - 1)];
+        const contractNumber = `N${randomNumber(10000, 99999)}-${randomNumber(
             10,
             99
         )}-C-${randomNumber(1000, 9999)}`;
         const contractType = contractTypes[randomNumber(0, contractTypes.length - 1)];
-        const workLocation = locations[randomNumber(0, locations.length - 1)];
+        const id = Math.random().toFixed(10).toString();
 
         contracts.push({
-            company,
-            location,
-            amount,
-            purpose,
-            completionDate,
-            contractActivity,
-            activityLocation,
-            contractCode,
-            contractType,
+            id,
             workLocation,
+            amountAwarded,
+            contractingActivity,
+            awardedFor,
+            contractType,
+            companyName,
+            contractNumber,
+            completionDate,
         });
     }
     return contracts;
 };
 
-const sampleContracts = generateContracts(500);
+const sampleContracts = generateContracts(5);
 
 function normalizeLocation(location: string): string {
-    const parts = location.split(', ');
-    const state = parts.length > 1 ? parts[1].trim() : null;
-    if (state && stateAbbreviations[state]) {
-        parts[1] = stateAbbreviations[state];
-        return parts.join(', ');
+    let firstLoc = location.split(';')[0];
+    const parts = firstLoc.split(', ');
+
+    let state: string = "";
+
+    for (let i = 0; i <= parts.length; i++) {
+        if (i === 1 && stateAbbrevs.includes(parts[i])){
+            state = abbrevToState[parts[i]];
+            break;
+        }
+        if (states.includes(parts[i])) {
+            state = parts[i];
+            break;
+        }
     }
-    return location;
+    
+    // if(!state) console.log(location);
+
+    return state;
+
+    // const state = parts.length > 1 ? parts[1].trim() : null;
+    // if (state && stateAbbreviationsMapping[state]) {
+        // parts[1] = stateAbbreviationsMapping[state];
+        // return parts.join(', ');
+    // }
+    // return location;
 }
 
 const useLocationStats = (contracts: Contract[]) => {
     return useMemo(() => {
         const stats: { [key: string]: any } = {};
-        contracts.forEach((contract) => {
-            const normalizedLocation = normalizeLocation(contract.activityLocation);
-            if (!stats[normalizedLocation]) {
-                stats[normalizedLocation] = {
-                    totalAmount: 0,
-                    count: 0,
-                    activities: {},
-                    types: {},
-                    companies: {},
-                    totalCompletionTime: 0,
-                    maxActivity: { name: '', count: 0 },
-                    maxType: { name: '', count: 0 },
-                    maxCompany: { name: '', count: 0 },
-                };
-            }
-            const locStats = stats[normalizedLocation];
-            locStats.totalAmount += contract.amount;
-            locStats.count++;
-            locStats.totalCompletionTime += contract.completionDate.getTime();
+        for (let contract of contracts) {
+            try {
+                const normalizedLocation = normalizeLocation(contract.workLocation);
+                if (!normalizedLocation) {
+                    // console.log('Could not normalize location:', contract.workLocation);
+                    continue;
+                }
+                if (!stats[normalizedLocation]) {
+                    stats[normalizedLocation] = {
+                        totalAmount: 0,
+                        count: 0,
+                        activities: {},
+                        types: {},
+                        companies: {},
+                        totalCompletionTime: 0,
+                        maxActivity: { name: '', count: 0 },
+                        maxType: { name: '', count: 0 },
+                        maxCompany: { name: '', count: 0 },
+                    };
+                }
+                const locStats = stats[normalizedLocation];
+                locStats.totalAmount += usdToNum(contract.amountAwarded);
+                locStats.count++;
+                locStats.totalCompletionTime += new Date(contract.completionDate).getTime();
 
-            const activityCount = (locStats.activities[contract.contractActivity] =
-                (locStats.activities[contract.contractActivity] || 0) + 1);
-            if (activityCount > locStats.maxActivity.count) {
-                locStats.maxActivity = { name: contract.contractActivity, count: activityCount };
-            }
+                const activityCount = (locStats.activities[contract.contractingActivity] =
+                    (locStats.activities[contract.contractingActivity] || 0) + 1);
+                if (activityCount > locStats.maxActivity.count) {
+                    locStats.maxActivity = {
+                        name: contract.contractingActivity,
+                        count: activityCount,
+                    };
+                }
 
-            const typeCount = (locStats.types[contract.contractType] =
-                (locStats.types[contract.contractType] || 0) + 1);
-            if (typeCount > locStats.maxType.count) {
-                locStats.maxType = { name: contract.contractType, count: typeCount };
-            }
+                const typeCount = (locStats.types[contract.contractType] =
+                    (locStats.types[contract.contractType] || 0) + 1);
+                if (typeCount > locStats.maxType.count) {
+                    locStats.maxType = { name: contract.contractType, count: typeCount };
+                }
 
-            const companyCount = (locStats.companies[contract.company] =
-                (locStats.companies[contract.company] || 0) + 1);
-            if (companyCount > locStats.maxCompany.count) {
-                locStats.maxCompany = { name: contract.company, count: companyCount };
+                const companyCount = (locStats.companies[contract.companyName] =
+                    (locStats.companies[contract.companyName] || 0) + 1);
+                if (companyCount > locStats.maxCompany.count) {
+                    locStats.maxCompany = { name: contract.companyName, count: companyCount };
+                }
+            } catch (err) {
+                console.log(err);
+                continue;
             }
-        });
-
+        }
         Object.keys(stats).forEach((location) => {
             const locStats = stats[location];
             locStats.averageAmount = locStats.totalAmount / locStats.count;
@@ -214,80 +249,39 @@ const useLocationStats = (contracts: Contract[]) => {
     }, [contracts]);
 };
 
-const stateAbbreviations: { [key: string]: string } = {
-    Alabama: 'AL',
-    Alaska: 'AK',
-    Arizona: 'AZ',
-    Arkansas: 'AR',
-    California: 'CA',
-    Colorado: 'CO',
-    Connecticut: 'CT',
-    Delaware: 'DE',
-    'District of Columbia': 'DC',
-    Florida: 'FL',
-    Georgia: 'GA',
-    Hawaii: 'HI',
-    Idaho: 'ID',
-    Illinois: 'IL',
-    Indiana: 'IN',
-    Iowa: 'IA',
-    Kansas: 'KS',
-    Kentucky: 'KY',
-    Louisiana: 'LA',
-    Maine: 'ME',
-    Maryland: 'MD',
-    Massachusetts: 'MA',
-    Michigan: 'MI',
-    Minnesota: 'MN',
-    Mississippi: 'MS',
-    Missouri: 'MO',
-    Montana: 'MT',
-    Nebraska: 'NE',
-    Nevada: 'NV',
-    'New Hampshire': 'NH',
-    'New Jersey': 'NJ',
-    'New Mexico': 'NM',
-    'New York': 'NY',
-    'North Carolina': 'NC',
-    'North Dakota': 'ND',
-    Ohio: 'OH',
-    Oklahoma: 'OK',
-    Oregon: 'OR',
-    Pennsylvania: 'PA',
-    'Rhode Island': 'RI',
-    'South Carolina': 'SC',
-    'South Dakota': 'SD',
-    Tennessee: 'TN',
-    Texas: 'TX',
-    Utah: 'UT',
-    Vermont: 'VT',
-    Virginia: 'VA',
-    Washington: 'WA',
-    'West Virginia': 'WV',
-    Wisconsin: 'WI',
-    Wyoming: 'WY',
-};
-
 const fetchCoordinates = async (place: string): Promise<[number, number]> => {
-    const accessToken =
-        'pk.eyJ1Ijoia3RhbmcxMjQiLCJhIjoiY2xnN2Jqbno5MGxtMjNncXJtMmp4OTVueiJ9.sehQpKCl_zg6M2z6lfojTg';
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-        place
-    )}.json?country=US&access_token=${accessToken}`;
+    // const accessToken =
+    //     '--redacted--';
+    // const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+    //     place
+    // )}.json?country=US&access_token=${accessToken}`;
 
-    try {
-        const response = await axios.get(url);
-        const coordinates = response.data.features[0].center as [number, number];
-        return coordinates;
-    } catch (error) {
-        console.error('Failed to fetch coordinates', error);
-        return [0, 0]; // Return a default value or handle appropriately
+    // try {
+    //     const response = await axios.get(url);
+    //     const coordinates = response.data.features[0].center as [number, number];
+    //     return coordinates;
+    // } catch (error) {
+    //     console.error('Failed to fetch coordinates', error);
+    //     return [0, 0]; // Return a default value or handle appropriately
+    // }
+
+    if (!stateCenters[place]) {
+        return [0,0];
     }
+
+    return [stateCenters[place].lon, stateCenters[place].lat];
 };
 
-const MapComponent: React.FC = () => {
+interface IProps {
+    data: Contract[];
+}
+
+const MapComponent: React.FC<IProps> = (props) => {
     const mapContainer = useRef<HTMLDivElement>(null);
-    const stats = useLocationStats(sampleContracts);
+    const stats = useLocationStats(props.data);
+
+    // console.log(sampleContracts);
+    // console.log(stats);
 
     useEffect(() => {
         if (!mapContainer.current) return;
