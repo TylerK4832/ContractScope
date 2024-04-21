@@ -1,15 +1,26 @@
-import CssBaseline from "@mui/material/CssBaseline";
 import "./App.css";
 import BasicExampleDataGrid from "./components/table";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import Layout from "./components/Layout";
 
 interface IProps {}
+
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+  },
+});
 
 const App: React.FC<IProps> = (props) => {
   return (
     <>
-      <CssBaseline />
-      <BasicExampleDataGrid />
-      {/* Add project code beneath the baseline */}
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <BasicExampleDataGrid />
+        {/* Add project code beneath the baseline */}
+        <Layout />
+      </ThemeProvider>
     </>
   );
 };
